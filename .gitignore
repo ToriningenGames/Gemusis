@@ -1,0 +1,11 @@
+missing
+Makefile.in
+install-sh
+depcomp
+configure
+config.*
+compile
+aclocal*
+*m4*
+bin/
+obj/
