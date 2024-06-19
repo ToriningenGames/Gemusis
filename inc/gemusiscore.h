@@ -33,7 +33,8 @@ struct color {
 #define MAXSCREENSIZE (sizeof(struct color) * 320 * 480)
 
 struct iohub {
-        bool isRunning;
+        bool systemRunning;
+        bool alive;
         struct color *screenData;       //The VDP thread is responsible for padding/scaling to the correct size
         SDL_mutex *screenLock;
 };

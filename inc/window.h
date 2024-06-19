@@ -7,12 +7,19 @@
 
 struct windowResult {
         union {
-                struct {
-                int showTv:1;
-                int showOptions:1;
-                int showVDP:1;
-                };
-        int asInt:3;
+        struct {
+                uint32_t showTv:1;
+                uint32_t showOptions:1;
+                uint32_t showVDP:1;
+                uint32_t showSound:1;
+                uint32_t showMotoDebugger:1;
+                uint32_t showZilogDebugger:1;
+                uint32_t showIO:1;
+                uint32_t showInfo:1;
+                uint32_t showMotoMemView:1;
+                uint32_t showZilogMemView:1;
+        };
+        uint32_t asInt;
         };
 };
 
@@ -23,26 +30,28 @@ struct window {
         SDL_Surface *surface;
         struct nk_context *context;
         struct nk_sdl *object; 
-        void (*init)(struct window *this);
-        void (*close)(struct window *this);
+        void (*init)(struct window *this, struct iohub *data);
+        void (*close)(struct window *this, struct iohub *data);
         bool (*isme)(struct window *this, Uint32 id);
         void (*eventready)(struct window *this);
-        void (*event)(struct window *this, SDL_Event *event);
+        struct windowResult (*event)(struct window *this, SDL_Event *event, struct iohub *data);
         void (*eventend)(struct window *this);
         struct windowResult (*draw)(struct window *this, struct iohub *data);
 };
 
 struct nk_font *fontinit(struct nk_sdl *this);
-void windowinit(struct window *this);
-void windowclose(struct window *this);
+void windowinit(struct window *this, struct iohub *data);
+void windowclose(struct window *this, struct iohub *data);
 bool windowisme(struct window *this, Uint32 id);
 void windoweventready(struct window *this);
-void windowevent(struct window *this, SDL_Event *event);
+struct windowResult windowevent(struct window *this, SDL_Event *event, struct iohub *data);
 void windoweventend(struct window *this);
 struct windowResult windowdraw(struct window *this, struct iohub *data);
 
-#define WINDOW_END 2
-#define WINDOW_TV 0
-#define WINDOW_OPTIONS 1
+enum windowTypes {
+        WINDOW_TV,
+        WINDOW_OPTIONS,
+        WINDOW_END,
+};
 
 #endif

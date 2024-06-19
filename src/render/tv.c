@@ -1,7 +1,7 @@
 #include "inc/tv.h"
 #include "inc/nkwrapper.h"
 
-void tvinit(struct window *this)
+void tvinit(struct window *this, struct iohub *data)
 {
         if (this->window) {
                 //Bring the window back to fore
@@ -10,18 +10,20 @@ void tvinit(struct window *this)
                 return;
         }
         //SDL init
-        this->window = SDL_CreateWindow("Game window", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 320, 480, SDL_WINDOW_RESIZABLE);
+        this->window = SDL_CreateWindow("Game window", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 320, 240, SDL_WINDOW_RESIZABLE);
         this->surface = SDL_CreateRGBSurface(0, 320, 480, 32, RMASK, GMASK, BMASK, 0);
         this->windowid = SDL_GetWindowID(this->window);
+        data->systemRunning = true;
 }
 
-void tvclose(struct window *this)
+void tvclose(struct window *this, struct iohub *data)
 {
         if (!this->window)
                 return;         //Nothing to clean
         SDL_DestroyWindow(this->window);
         SDL_FreeSurface(this->surface);
         this->window = NULL;
+        data->systemRunning = false;
 }
 
 bool tvisme(struct window *this, Uint32 id)
@@ -33,18 +35,24 @@ bool tvisme(struct window *this, Uint32 id)
 
 void tveventready(struct window *this)
 {
-        ;
+        (void)this;
 }
 
-void tvevent(struct window *this, SDL_Event *event)
+struct windowResult tvevent(struct window *this, SDL_Event *event, struct iohub *data)
 {
-        if (event->type = SDL_WINDOWEVENT && ((struct SDL_WindowEvent*)event)->event == SDL_WINDOWEVENT_CLOSE)
-                this->close(this);
+        struct windowResult result = {0};
+        if (!this->window)
+                return result;
+        if (event->type == SDL_WINDOWEVENT && ((struct SDL_WindowEvent*)event)->event == SDL_WINDOWEVENT_CLOSE)
+                this->close(this, data);
+        if (event->type == SDL_KEYDOWN && ((struct SDL_KeyboardEvent*)event)->keysym.scancode == SDL_SCANCODE_F1)
+                result.showOptions = true;
+        return result;
 }
 
 void tveventend(struct window *this)
 {
-        ;
+        (void)this;
 }
 
 struct windowResult tvdraw(struct window *this, struct iohub *data)

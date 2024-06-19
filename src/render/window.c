@@ -11,8 +11,9 @@ struct nk_font *fontinit(struct nk_sdl *this)
         return font;
 }
 
-void windowinit(struct window *this)
+void windowinit(struct window *this, struct iohub *data)
 {
+        (void)data;
         if (this->window) {
                 //Bring the window back to fore
                 SDL_RaiseWindow(this->window);
@@ -37,8 +38,9 @@ bool windowisme(struct window *this, Uint32 id)
         return id == this->windowid;
 }
 
-void windowclose(struct window *this)
+void windowclose(struct window *this, struct iohub *data)
 {
+        (void)data;
         if (!this->window)
                 return;         //Nothing to clean
         nk_sdl_shutdown(this->object);
@@ -63,17 +65,21 @@ void windoweventend(struct window *this)
         nk_input_end(this->context);
 }
 
-void windowevent(struct window *this, SDL_Event *event)
+struct windowResult windowevent(struct window *this, SDL_Event *event, struct iohub *data)
 {
+        (void)data;
+        struct windowResult result = {0};
         if (!this->window)
-                return;         //Nothing to run
+                return result;         //Nothing to run
         nk_sdl_handle_event(this->object, event);
-        if (event->type = SDL_WINDOWEVENT && ((struct SDL_WindowEvent*)event)->event == SDL_WINDOWEVENT_CLOSE)
-                windowclose(this);
+        if (event->type == SDL_WINDOWEVENT && ((struct SDL_WindowEvent*)event)->event == SDL_WINDOWEVENT_CLOSE)
+                windowclose(this, data);
+        return result;
 }
 
 struct windowResult windowdraw(struct window *this, struct iohub *data)
 {
+        (void)data;
         struct windowResult results = {0};
         if (!this->window)
                 return results;         //Nothing to draw

@@ -1,7 +1,8 @@
 #include "inc/options.h"
 
-void optionsinit(struct window *this)
+void optionsinit(struct window *this, struct iohub *data)
 {
+        (void)data;
         if (this->window) {
                 //Bring the window back to fore
                 SDL_RaiseWindow(this->window);
@@ -21,6 +22,7 @@ void optionsinit(struct window *this)
 
 struct windowResult optionsdraw(struct window *this, struct iohub *data)
 {
+        (void)data;
         struct windowResult results = {0};
         if (!this->window)
                 return results;         //Nothing to draw
@@ -28,11 +30,32 @@ struct windowResult optionsdraw(struct window *this, struct iohub *data)
         if (nk_begin(this->context, "OptionWin", nk_rect(0,0,800,600), 0)) {
                 nk_layout_row_dynamic(this->context, 30, 1);
                 nk_label(this->context, "Summon Windows", NK_TEXT_LEFT);
-                if (nk_button_label(this->context, "TV")) {
+                if (nk_button_label(this->context, "Game")) {
                         results.showTv = 1;
                 }
-                if (nk_button_label(this->context, "VDP")) {
+                if (nk_button_label(this->context, "Graphics")) {
                         results.showVDP = 1;
+                }
+                if (nk_button_label(this->context, "Sound")) {
+                        results.showSound = 1;
+                }
+                if (nk_button_label(this->context, "68000 Debugger")) {
+                        results.showMotoDebugger = 1;
+                }
+                if (nk_button_label(this->context, "Z80 Debugger")) {
+                        results.showZilogDebugger = 1;
+                }
+                if (nk_button_label(this->context, "IO Status")) {
+                        results.showIO = 1;
+                }
+                if (nk_button_label(this->context, "Cart Information")) {
+                        results.showInfo = 1;
+                }
+                if (nk_button_label(this->context, "68000 Memory Tracker")) {
+                        results.showMotoMemView = 1;
+                }
+                if (nk_button_label(this->context, "Z80 Memory Tracker")) {
+                        results.showZilogMemView = 1;
                 }
         }
         nk_end(this->context);

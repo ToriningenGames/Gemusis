@@ -1,4 +1,4 @@
-AM_CPPFLAGS = @SDL2_CFLAGS@ -I../Nuklear -I../inc -g
+AM_CPPFLAGS = @SDL2_CFLAGS@ -I../Nuklear -I../inc -g -Wall -Wextra -Wpedantic
 
 bin_PROGRAMS = gemusis
 

@@ -4,7 +4,7 @@
 #include "inc/options.h"
 #include "inc/tv.h"
 
-#define forAllWindows(X, Y) for (int winfor = 0; Y = X[winfor]; winfor++)
+#define forAllWindows(X, Y) for (int winfor = 0; (Y = X[winfor]); winfor++)
 
 //This _must_ be run on the main thread!
 void render(struct iohub *data)
@@ -19,12 +19,13 @@ void render(struct iohub *data)
         SDL_Event event;
         
         forAllWindows(windows, win) {
-                win->init(win);
+                win->init(win, data);
         }
         
         //Event loop
-        while (data->isRunning) {
+        while (data->alive) {
                 //Event polling
+                results.asInt = 0;
                 forAllWindows(windows, win) {
                         win->eventready(win);
                 }
@@ -32,15 +33,17 @@ void render(struct iohub *data)
                 while (SDL_PollEvent(&event)) {
                         switch (event.type) {
                         case SDL_QUIT :
-                                data->isRunning = false;
+                                data->alive = false;
                                 break;
+                        case SDL_KEYUP :
+                        case SDL_KEYDOWN :
                         case SDL_WINDOWEVENT :
                         case SDL_MOUSEBUTTONDOWN :
                         case SDL_MOUSEBUTTONUP :
                         case SDL_MOUSEMOTION :
                                 forAllWindows(windows, win) {
                                         if (win->isme(win, ((Uint32*)&event)[2]))
-                                                win->event(win, &event);
+                                                results.asInt |= win->event(win, &event, data).asInt;
                                 }
                                 break;
                         default :
@@ -51,24 +54,20 @@ void render(struct iohub *data)
                         win->eventend(win);
                 }
                 
-                results.asInt = 0;
                 forAllWindows(windows, win) {
                         results.asInt |= win->draw(win, data).asInt;
                 }
                 
                 //Results processing
                 if (results.showTv) {
-                        windows[WINDOW_TV]->init(windows[WINDOW_TV]);
-                }
-                if (results.showVDP) {
-                        //
+                        windows[WINDOW_TV]->init(windows[WINDOW_TV], data);
                 }
                 if (results.showOptions) {
-                        windows[WINDOW_OPTIONS]->init(windows[WINDOW_OPTIONS]);
+                        windows[WINDOW_OPTIONS]->init(windows[WINDOW_OPTIONS], data);
                 }
         }
         forAllWindows(windows, win) {
-                win->close(win);
+                win->close(win, data);
         }
         SDL_Quit();
         return;
