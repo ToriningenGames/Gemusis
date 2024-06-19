@@ -1,4 +1,4 @@
-AC_INIT([gemusis], [0], [toriningengames@gmail.com], [https://www.toriningen.com/])
+AC_INIT([gemusis], [0], [toriningengames@gmail.com], [gemusis], [https://www.toriningen.com/])
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 
 AC_PROG_CC
