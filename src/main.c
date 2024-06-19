@@ -10,6 +10,11 @@ int main(int argc, char **argv)
         struct iohub *data = malloc(sizeof(*data));
         data->isRunning = true;
         data->screenData = malloc(MAXSCREENSIZE);
+        for (int i = 0; i < MAXSCREENSIZE / sizeof(*data->screenData); i++) {
+                data->screenData[i].r = (i%320) / 40 % 2 ? 0 : 255;
+                data->screenData[i].g = (i%320) / 80 % 2 ? 0 : 255;
+                data->screenData[i].b = (i%320) / 160 % 2 ? 0 : 255;
+        }
         data->screenLock = SDL_CreateMutex();
         //Begin rendering
         render(data);
