@@ -8,8 +8,8 @@
 struct windowResult {
         union {
         struct {
-                uint32_t showTv:1;
                 uint32_t showOptions:1;
+                uint32_t showTv:1;
                 uint32_t showVDP:1;
                 uint32_t showSound:1;
                 uint32_t showMotoDebugger:1;

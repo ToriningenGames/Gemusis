@@ -1,17 +1,19 @@
 #include "inc/options.h"
 
+#define BARHEIGHT 30
+
 void optionsinit(struct window *this, struct iohub *data)
 {
         (void)data;
         if (this->window) {
                 //Bring the window back to fore
                 SDL_RaiseWindow(this->window);
-                SDL_SetWindowPosition(this->window, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED);
+                SDL_SetWindowPosition(this->window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
                 return;
         }
         this->object = malloc(sizeof(*this->object));
         //NK init
-        this->window = SDL_CreateWindow("Options", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 800, 600, 0);
+        this->window = SDL_CreateWindow("Options", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 800, 600, SDL_WINDOW_RESIZABLE);
         this->renderer = SDL_CreateRenderer(this->window, -1, 0);
         this->windowid = SDL_GetWindowID(this->window);
         this->context = nk_sdl_init(this->object, this->window, this->renderer);
@@ -20,15 +22,38 @@ void optionsinit(struct window *this, struct iohub *data)
         nk_style_set_font(this->context, &font->handle);
 }
 
+//How this window works:
+/*
+        There's a window on the top of the screen with buttons. This is a fake tab bar.
+        Beneath the tab bar is a window of the same size and placement for each screen.
+        When one of the tab bar buttons are pressed, that window is moved to top.
+*/
+
 struct windowResult optionsdraw(struct window *this, struct iohub *data)
 {
         (void)data;
         struct windowResult results = {0};
         if (!this->window)
                 return results;         //Nothing to draw
-        //NK windows
-        if (nk_begin(this->context, "OptionWin", nk_rect(0,0,800,600), 0)) {
-                nk_layout_row_dynamic(this->context, 30, 1);
+        int width, height;
+        SDL_GetWindowSize(this->window, &width, &height);
+        //Menu bar
+        if (nk_begin(this->context, "Menu", nk_rect(0,0,width,BARHEIGHT), NK_WINDOW_NO_SCROLLBAR)) {
+                nk_layout_row_dynamic(this->context, BARHEIGHT-10, 5);
+                if (nk_button_label(this->context, "Summon Windows")) {
+                        nk_window_set_focus(this->context, "Summon");
+                }
+                if (nk_button_label(this->context, "System")) {
+                        nk_window_set_focus(this->context, "System");
+                }
+                if (nk_button_label(this->context, "Emulation")) {
+                        nk_window_set_focus(this->context, "Emu");
+                }
+        }
+        nk_end(this->context);
+        //Window getter
+        if (nk_begin(this->context, "Summon", nk_rect(0,BARHEIGHT,width,height-BARHEIGHT), 0)) {
+                nk_layout_row_dynamic(this->context, 0, 1);
                 nk_label(this->context, "Summon Windows", NK_TEXT_LEFT);
                 if (nk_button_label(this->context, "Game")) {
                         results.showTv = 1;
@@ -57,6 +82,22 @@ struct windowResult optionsdraw(struct window *this, struct iohub *data)
                 if (nk_button_label(this->context, "Z80 Memory Tracker")) {
                         results.showZilogMemView = 1;
                 }
+        }
+        nk_end(this->context);
+        //System options
+        if (nk_begin(this->context, "System", nk_rect(0,BARHEIGHT,width,height-BARHEIGHT), 0)) {
+                nk_layout_row_dynamic(this->context, 0, 1);
+                nk_label(this->context, "System options", NK_TEXT_LEFT);
+                nk_checkbox_label(this->context, "Enable VSync", &data->vsync);
+                if (nk_button_label(this->context, "Apply changes")) {
+                        SDL_SetHint(SDL_HINT_RENDER_VSYNC, data->vsync ? "1" : "0");
+                }
+        }
+        nk_end(this->context);
+        //Emu options
+        if (nk_begin(this->context, "Emu", nk_rect(0,BARHEIGHT,width,height-BARHEIGHT), 0)) {
+                nk_layout_row_dynamic(this->context, 0, 1);
+                nk_label(this->context, "Emulation options", NK_TEXT_LEFT);
         }
         nk_end(this->context);
 

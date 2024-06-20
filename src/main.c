@@ -3,12 +3,13 @@
 #include <SDL2/SDL.h>
 #include "inc/gemusiscore.h"
 
+struct shortcut programShortcuts[SC_End];
 
 int main(int argc, char **argv)
 {
         (void)argc; (void)argv;
         SDL_Init(SDL_INIT_EVERYTHING);
-        struct iohub *data = malloc(sizeof(*data));
+        struct iohub *data = calloc(1, sizeof(*data));
         data->alive = true;
         data->systemRunning = false;
         data->screenLock = SDL_CreateMutex();

@@ -20,6 +20,7 @@ struct sixButtonJoy {
         int right:1;
 };
 
+//Screen defines
 struct color {
         uint8_t r;
         uint8_t g;
@@ -37,7 +38,27 @@ struct iohub {
         bool alive;
         struct color *screenData;       //The VDP thread is responsible for padding/scaling to the correct size
         SDL_mutex *screenLock;
+        bool vsync;                     //Whether screen drawing should respect VSync
 };
 void render(struct iohub *data);
+
+//Program control defines
+extern struct shortcut {
+        SDL_Keymod modifiers;
+        SDL_Scancode key;       //No support for multi-key shortcuts
+} programShortcuts[];
+enum shortcutCode {
+        SC_OpenOptions,
+        SC_OpenTv,
+        SC_OpenVDP,
+        SC_OpenSound,
+        SC_OpenMotoDebug,
+        SC_OpenZilogDebug,
+        SC_OpenIO,
+        SC_OpenInfo,
+        SC_OpenMotoMemView,
+        SC_OpenZilogMemView,
+        SC_End
+};
 
 #endif

@@ -17,7 +17,7 @@ void windowinit(struct window *this, struct iohub *data)
         if (this->window) {
                 //Bring the window back to fore
                 SDL_RaiseWindow(this->window);
-                SDL_SetWindowPosition(this->window, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED);
+                SDL_SetWindowPosition(this->window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
                 return;
         }
         this->object = malloc(sizeof(*this->object));

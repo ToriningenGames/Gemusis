@@ -19,6 +19,7 @@ EXTRA_DIST = 	fonts/ProggyClean.ttf\
 		inc/window.h\
 		inc/nuklear_sdl_renderer.h\
 		inc/nuklear.h
+
 $(builddir)/ProggyClean.ttf:
 	$(AM_V_at)$(MKDIR_P) $(builddir)
 	$(AM_V_at)cp $(srcdir)/fonts/ProggyClean.ttf $(builddir)/ProggyClean.ttf
