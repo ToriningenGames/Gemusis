@@ -19,6 +19,7 @@ int main(int argc, char **argv)
                 data->screenData[i].g = (i%320) / 80 % 2 ? 0 : 255;
                 data->screenData[i].b = (i%320) / 160 % 2 ? 0 : 255;
         }
+        //Threads go here
         //Begin rendering
         render(data);
         //Asked to quit; kill the children

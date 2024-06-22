@@ -49,6 +49,12 @@ struct windowResult optionsdraw(struct window *this, struct iohub *data)
                 if (nk_button_label(this->context, "Emulation")) {
                         nk_window_set_focus(this->context, "Emu");
                 }
+                if (nk_button_label(this->context, "Sound")) {
+                        //nk_window_set_focus(this->context, "Sound");
+                }
+                if (nk_button_label(this->context, "Visuals")) {
+                        //nk_window_set_focus(this->context, "Video");
+                }
         }
         nk_end(this->context);
         //Window getter
