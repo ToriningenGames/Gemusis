@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <SDL2/SDL_mutex.h>
 
+//System defines
 struct sixButtonJoy {
         int a:1;
         int b:1;
@@ -18,6 +19,48 @@ struct sixButtonJoy {
         int down:1;
         int left:1;
         int right:1;
+};
+
+struct motoRegFile {
+        uint32_t D0;
+        uint32_t D1;
+        uint32_t D2;
+        uint32_t D3;
+        uint32_t D4;
+        uint32_t D5;
+        uint32_t D6;
+        uint32_t D7;
+        uint32_t A0;
+        uint32_t A1;
+        uint32_t A2;
+        uint32_t A3;
+        uint32_t A4;
+        uint32_t A5;
+        uint32_t A6;
+        uint32_t A7;
+        uint32_t PC;
+        union {
+                //Notice: This is little-endian dependent
+                uint16_t SSR;
+                uint8_t CCR;
+                //TODO: What is the behavior of the undefined bits?
+                struct {
+                        bool carry:1;
+                        bool overflow:1;
+                        bool zero:1;
+                        bool negative:1;
+                        bool extend:1;
+                        bool b5:1;
+                        bool b6:1;
+                        bool b7:1;
+                        uint8_t interrupt:3;
+                        bool b11:1;
+                        bool b12:1;
+                        bool supervisor:1;      //TODO: Is this always 1, or does it merely do nothing?
+                        bool b14:1;
+                        bool trace:1;
+                };
+        } SSR;
 };
 
 //Screen defines
@@ -39,6 +82,7 @@ struct iohub {
         struct color *screenData;       //The VDP thread is responsible for padding/scaling to the correct size
         SDL_mutex *screenLock;
         bool vsync;                     //Whether screen drawing should respect VSync
+        struct motoRegFile motoRegs;
 };
 void render(struct iohub *data);
 

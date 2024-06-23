@@ -13,12 +13,14 @@ int main(int argc, char **argv)
         data->alive = true;
         data->systemRunning = false;
         data->screenLock = SDL_CreateMutex();
+        //Test data
         data->screenData = malloc(MAXSCREENSIZE);
         for (unsigned long i = 0; i < MAXSCREENSIZE / sizeof(*data->screenData); i++) {
                 data->screenData[i].r = (i%320) / 40 % 2 ? 0 : 255;
                 data->screenData[i].g = (i%320) / 80 % 2 ? 0 : 255;
                 data->screenData[i].b = (i%320) / 160 % 2 ? 0 : 255;
         }
+        data->motoRegs.D1 = 0xAA55;
         //Threads go here
         //Begin rendering
         render(data);

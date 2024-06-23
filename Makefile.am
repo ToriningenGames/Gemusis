@@ -7,7 +7,8 @@ gemusis_SOURCES = 	src/main.c\
 			src/render/options.c\
 			src/render/tv.c\
 			src/render/nuklear.c\
-			src/render/window.c
+			src/render/window.c\
+			src/render/motodebug.c
 		
 gemusis_LDADD = @SDL2_LIBS@ -lm
 
@@ -16,6 +17,7 @@ EXTRA_DIST = 	fonts/ProggyClean.ttf\
 		inc/nkwrapper.h\
 		inc/options.h\
 		inc/tv.h\
+		inc/motodebug.h\
 		inc/window.h\
 		inc/nuklear_sdl_renderer.h\
 		inc/nuklear.h

@@ -51,6 +51,7 @@ struct windowResult windowdraw(struct window *this, struct iohub *data);
 enum windowTypes {
         WINDOW_TV,
         WINDOW_OPTIONS,
+        WINDOW_MOTODEBUG,
         WINDOW_END,
 };
 

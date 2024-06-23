@@ -3,6 +3,7 @@
 
 #include "inc/options.h"
 #include "inc/tv.h"
+#include "inc/motodebug.h"
 
 #define forAllWindows(X, Y) for (int winfor = 0; (Y = X[winfor]); winfor++)
 
@@ -15,6 +16,7 @@ void render(struct iohub *data)
         struct windowResult results;
         windows[WINDOW_TV] = tvGet();
         windows[WINDOW_OPTIONS] = optionsGet();
+        windows[WINDOW_MOTODEBUG] = motodebugGet();
         windows[WINDOW_END] = NULL;
         SDL_Event event;
         
@@ -36,11 +38,15 @@ void render(struct iohub *data)
                                 data->alive = false;
                                 break;
                         case SDL_KEYUP :
+                        case SDL_TEXTINPUT :
+                        case SDL_TEXTEDITING :
+                        case SDL_TEXTEDITING_EXT :
                         case SDL_KEYDOWN :
                         case SDL_WINDOWEVENT :
                         case SDL_MOUSEBUTTONDOWN :
                         case SDL_MOUSEBUTTONUP :
                         case SDL_MOUSEMOTION :
+                        case SDL_MOUSEWHEEL :
                                 forAllWindows(windows, win) {
                                         if (win->isme(win, ((Uint32*)&event)[2]))
                                                 results.asInt |= win->event(win, &event, data).asInt;
