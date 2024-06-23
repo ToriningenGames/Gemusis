@@ -34,105 +34,108 @@ void motodebuginit(struct window *this, struct iohub *data)
 
 struct windowResult motodebugdraw(struct window *this, struct iohub *data)
 {
-        (void)data;
         struct windowResult results = {0};
         if (!this->window)
                 return results;         //Nothing to draw
         int width, height;
+        bool enter = false;
         SDL_GetWindowSize(this->window, &width, &height);
-        //Main code view
-        if (nk_begin(this->context, "Code", nk_rect(0,0,width-STACKWIDTH,height-COMMANDHEIGHT),0)) {
-                nk_layout_row_dynamic(this->context, 15, 1);
-                for (int i = 0; i < 65535; i++) {
-                        nk_selectable_label(this->context, "item", NK_TEXT_LEFT, codeselect+i);
-                        if (i == selectedline && !codeselect[i]) {
-                                selectedline = -1;
+        //Remove scrollbars
+        width += 10;
+        height += 10;
+        if (nk_begin(this->context, "MotoDebug", nk_rect(0,0,width,height),0)) {
+                nk_layout_row_begin(this->context, NK_STATIC, height-COMMANDHEIGHT, 2);
+                nk_layout_row_push(this->context, width-STACKWIDTH-15);
+                //Main code view
+                if (nk_group_begin(this->context, "Code", 0)) {
+                        nk_layout_row_dynamic(this->context, 15, 1);
+                        for (int i = 0; i < 65535; i++) {
+                                nk_selectable_label(this->context, "item", NK_TEXT_LEFT, codeselect+i);
+                                if (i == selectedline && !codeselect[i]) {
+                                        selectedline = -1;
+                                }
+                                if (codeselect[i] && i != selectedline) {
+                                        if (selectedline >= 0)
+                                                codeselect[selectedline] = 0;
+                                        selectedline = i;
+                                        codeselect[selectedline] = 1;
+                                }
                         }
-                        if (codeselect[i] && i != selectedline) {
-                                if (selectedline >= 0)
-                                        codeselect[selectedline] = 0;
-                                selectedline = i;
-                                codeselect[selectedline] = 1;
-                        }
+                        nk_group_end(this->context);
                 }
-        }
-        nk_end(this->context);
-        //Register view
-        if (nk_begin(this->context, "Registers", nk_rect(width-STACKWIDTH,0,STACKWIDTH,STACKHEIGHT),0)) {
-                nk_layout_row_dynamic(this->context, 20, 2);
-                char regline[22];
-                sprintf(regline, "D0: $%08X", data->motoRegs.D0);
-                nk_label(this->context, regline, NK_TEXT_CENTERED);
-                sprintf(regline, "A0: $%08X", data->motoRegs.A0);
-                nk_label(this->context, regline, NK_TEXT_CENTERED);
-                sprintf(regline, "D1: $%08X", data->motoRegs.D1);
-                nk_label(this->context, regline, NK_TEXT_CENTERED);
-                sprintf(regline, "A1: $%08X", data->motoRegs.A1);
-                nk_label(this->context, regline, NK_TEXT_CENTERED);
-                sprintf(regline, "D2: $%08X", data->motoRegs.D2);
-                nk_label(this->context, regline, NK_TEXT_CENTERED);
-                sprintf(regline, "A2: $%08X", data->motoRegs.A2);
-                nk_label(this->context, regline, NK_TEXT_CENTERED);
-                sprintf(regline, "D3: $%08X", data->motoRegs.D3);
-                nk_label(this->context, regline, NK_TEXT_CENTERED);
-                sprintf(regline, "A3: $%08X", data->motoRegs.A3);
-                nk_label(this->context, regline, NK_TEXT_CENTERED);
-                sprintf(regline, "D4: $%08X", data->motoRegs.D4);
-                nk_label(this->context, regline, NK_TEXT_CENTERED);
-                sprintf(regline, "A4: $%08X", data->motoRegs.A4);
-                nk_label(this->context, regline, NK_TEXT_CENTERED);
-                sprintf(regline, "D5: $%08X", data->motoRegs.D5);
-                nk_label(this->context, regline, NK_TEXT_CENTERED);
-                sprintf(regline, "A5: $%08X", data->motoRegs.A5);
-                nk_label(this->context, regline, NK_TEXT_CENTERED);
-                sprintf(regline, "D6: $%08X", data->motoRegs.D6);
-                nk_label(this->context, regline, NK_TEXT_CENTERED);
-                sprintf(regline, "A6: $%08X", data->motoRegs.A6);
-                nk_label(this->context, regline, NK_TEXT_CENTERED);
-                sprintf(regline, "D7: $%08X", data->motoRegs.D7);
-                nk_label(this->context, regline, NK_TEXT_CENTERED);
-                sprintf(regline, "A7: $%08X", data->motoRegs.A7);
-                nk_label(this->context, regline, NK_TEXT_CENTERED);
-                nk_layout_row_dynamic(this->context, 20, 1);
-                sprintf(regline, "PC: $%08X", data->motoRegs.PC);
-                nk_label(this->context, regline, NK_TEXT_CENTERED);
-                sprintf(regline, "SSR: %c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c",
-                        data->motoRegs.SSR.trace ? 'T' : 't',
-                        data->motoRegs.SSR.b14 ? '1' : '0',
-                        data->motoRegs.SSR.supervisor ? 'M' : 'm',
-                        data->motoRegs.SSR.b12 ? '1' : '0',
-                        data->motoRegs.SSR.b11 ? '1' : '0',
-                        data->motoRegs.SSR.interrupt & 1 ? '1' : '0',
-                        data->motoRegs.SSR.interrupt & 2 ? '1' : '0',
-                        data->motoRegs.SSR.interrupt & 4 ? '1' : '0',
-                        data->motoRegs.SSR.b7 ? '1' : '0',
-                        data->motoRegs.SSR.b6 ? '1' : '0',
-                        data->motoRegs.SSR.b5 ? '1' : '0',
-                        data->motoRegs.SSR.extend ? 'X' : 'x',
-                        data->motoRegs.SSR.negative ? 'N' : 'n',
-                        data->motoRegs.SSR.zero ? 'Z' : 'z',
-                        data->motoRegs.SSR.overflow ? 'O' : 'o',
-                        data->motoRegs.SSR.carry ? 'C' : 'c');
-                nk_label(this->context, regline, NK_TEXT_CENTERED);
-        }
-        nk_end(this->context);
-        //Stack view
-        if (nk_begin(this->context, "Stack", nk_rect(width-STACKWIDTH,STACKHEIGHT,STACKWIDTH,height-STACKHEIGHT-COMMANDHEIGHT),0)) {
-                nk_layout_row_dynamic(this->context, 20, 1);
-                nk_label(this->context, "Stack goes here", NK_TEXT_CENTERED);
-        }
-        nk_end(this->context);
-        //Command line
-        if (nk_begin(this->context, "Command", nk_rect(0,height-COMMANDHEIGHT,width,COMMANDHEIGHT),0)) {
+                nk_layout_row_push(this->context, STACKWIDTH);
+                //Register/Stack view
+                if (nk_group_begin(this->context, "Registers", 0)) {
+                        nk_layout_row_dynamic(this->context, 20, 2);
+                        char regline[22];
+                        sprintf(regline, "D0: $%08X", data->motoRegs.D0);
+                        nk_label(this->context, regline, NK_TEXT_CENTERED);
+                        sprintf(regline, "A0: $%08X", data->motoRegs.A0);
+                        nk_label(this->context, regline, NK_TEXT_CENTERED);
+                        sprintf(regline, "D1: $%08X", data->motoRegs.D1);
+                        nk_label(this->context, regline, NK_TEXT_CENTERED);
+                        sprintf(regline, "A1: $%08X", data->motoRegs.A1);
+                        nk_label(this->context, regline, NK_TEXT_CENTERED);
+                        sprintf(regline, "D2: $%08X", data->motoRegs.D2);
+                        nk_label(this->context, regline, NK_TEXT_CENTERED);
+                        sprintf(regline, "A2: $%08X", data->motoRegs.A2);
+                        nk_label(this->context, regline, NK_TEXT_CENTERED);
+                        sprintf(regline, "D3: $%08X", data->motoRegs.D3);
+                        nk_label(this->context, regline, NK_TEXT_CENTERED);
+                        sprintf(regline, "A3: $%08X", data->motoRegs.A3);
+                        nk_label(this->context, regline, NK_TEXT_CENTERED);
+                        sprintf(regline, "D4: $%08X", data->motoRegs.D4);
+                        nk_label(this->context, regline, NK_TEXT_CENTERED);
+                        sprintf(regline, "A4: $%08X", data->motoRegs.A4);
+                        nk_label(this->context, regline, NK_TEXT_CENTERED);
+                        sprintf(regline, "D5: $%08X", data->motoRegs.D5);
+                        nk_label(this->context, regline, NK_TEXT_CENTERED);
+                        sprintf(regline, "A5: $%08X", data->motoRegs.A5);
+                        nk_label(this->context, regline, NK_TEXT_CENTERED);
+                        sprintf(regline, "D6: $%08X", data->motoRegs.D6);
+                        nk_label(this->context, regline, NK_TEXT_CENTERED);
+                        sprintf(regline, "A6: $%08X", data->motoRegs.A6);
+                        nk_label(this->context, regline, NK_TEXT_CENTERED);
+                        sprintf(regline, "D7: $%08X", data->motoRegs.D7);
+                        nk_label(this->context, regline, NK_TEXT_CENTERED);
+                        sprintf(regline, "A7: $%08X", data->motoRegs.A7);
+                        nk_label(this->context, regline, NK_TEXT_CENTERED);
+                        nk_layout_row_dynamic(this->context, 20, 1);
+                        sprintf(regline, "PC: $%08X", data->motoRegs.PC);
+                        nk_label(this->context, regline, NK_TEXT_CENTERED);
+                        sprintf(regline, "SSR: %c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c",
+                                data->motoRegs.SSR.trace ? 'T' : 't',
+                                data->motoRegs.SSR.b14 ? '1' : '0',
+                                data->motoRegs.SSR.supervisor ? 'M' : 'm',
+                                data->motoRegs.SSR.b12 ? '1' : '0',
+                                data->motoRegs.SSR.b11 ? '1' : '0',
+                                data->motoRegs.SSR.interrupt & 1 ? '1' : '0',
+                                data->motoRegs.SSR.interrupt & 2 ? '1' : '0',
+                                data->motoRegs.SSR.interrupt & 4 ? '1' : '0',
+                                data->motoRegs.SSR.b7 ? '1' : '0',
+                                data->motoRegs.SSR.b6 ? '1' : '0',
+                                data->motoRegs.SSR.b5 ? '1' : '0',
+                                data->motoRegs.SSR.extend ? 'X' : 'x',
+                                data->motoRegs.SSR.negative ? 'N' : 'n',
+                                data->motoRegs.SSR.zero ? 'Z' : 'z',
+                                data->motoRegs.SSR.overflow ? 'O' : 'o',
+                                data->motoRegs.SSR.carry ? 'C' : 'c');
+                        nk_label(this->context, regline, NK_TEXT_CENTERED);
+                        nk_layout_row_dynamic(this->context, 20, 1);
+                        nk_label(this->context, "Stack goes here", NK_TEXT_CENTERED);
+                        nk_group_end(this->context);
+                }
+                nk_layout_row_end(this->context);
+                //Command line
                 nk_layout_row_begin(this->context, NK_DYNAMIC, COMMANDHEIGHT-15, 2);
                 nk_layout_row_push(this->context, 0.90f);
-                nk_edit_string_zero_terminated(this->context,
+                enter = nk_edit_string_zero_terminated(this->context,
                         NK_EDIT_AUTO_SELECT | NK_EDIT_ALWAYS_INSERT_MODE | NK_EDIT_SELECTABLE | NK_EDIT_SIG_ENTER,
                         cmdbuf,
                         sizeof(cmdbuf),
-                        0);
+                        0) & NK_EDIT_COMMITED;
                 nk_layout_row_push(this->context, 0.10f);
-                nk_button_label(this->context, "submit");
+                enter |= nk_button_label(this->context, "submit");
                 nk_layout_row_end(this->context);
         }
         nk_end(this->context);
@@ -143,6 +146,11 @@ struct windowResult motodebugdraw(struct window *this, struct iohub *data)
         SDL_RenderPresent(this->renderer);
         
         //Processing
+        if (enter) {
+                //User hit enter on the command line
+                //Clear the line
+                cmdbuf[0] = '\0';
+        }
         return results;
 }
 
